@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/webp" href="C:\Users\Prince\Downloads\KLCAL\src\fav_icon.webp">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* Prevent scrolling on the body */
+        }
+
+        /*Slider*/
+        .switch-container {
+            position: absolute;
+            top: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+
+            display: none; /* Hide initially */
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-right: 10px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #e60000;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /*Popup*/
+        .popup {
+            position: absolute;
+            min-width: 380px;
+            min-height: 450px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 700px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideIn 0.8s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .popup-content h2 {
+            margin-top: auto;
+            margin-bottom: auto;
+            text-align: left;
+            color: #e60000;
+            font-weight: 600; /* Semi-bold */
+            font-size: xx-large;
+        }
+
+        .popup-content p {
+            margin: 18px 0;
+            text-align: left;
+        }
+
+        .popup-button {
+            align-self: flex-start; /* Left alignment */
+            width: 100px; /* Width of 100px */
+            padding: 10px;
+            background: linear-gradient(45deg, #e60000, #9b0000); /* Mid red to dark red */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 400;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .popup-button:active {
+            background: linear-gradient(45deg, #ff0000, #e60000); /* Mid red to dark red */
+            transform: translateY(-2px);
+        }
+
+        /*Attendance & Cgpa*/
+
+        .form-container,
+        .calculator-container {
+            display: none;
+            max-width: 1000px;
+            min-height: 420px;
+            width: calc(100% - 40px); /* Added side margin */
+            margin: 0 20px; /* Added side margin */
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            overflow-y: auto; /* Add vertical scroll if needed */
+        }
+
+        .calculator-container {
+            display: none;
+            max-width: 1000px;
+            height: 400px; /* Fixed height for the container */
+            width: calc(100% - 40px);
+            margin: 0 20px;
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+            overflow-y: auto; /* Add vertical scroll if needed */
+        }
+
+        .calculator-container::-webkit-scrollbar {
+            width: 0;  /* Make scrollbar invisible */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: lighter;
+        }
+        
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #444;
+            color: #fff;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .form-group input[type="number"]:focus {
+            border-color: #e60000;
+            background-color: #555;
+            outline: none;
+        }
+
+        /*Result*/
+        
+        .resultAttend,.resultCgpa{
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: 1000;
+            opacity: 0;
+            color:#e60000;
+            transition: opacity 0.4s ease-in-out, transform 0.3s ease-in-out;
+        }
+        
+        .resultAttend.visible,.resultCgpa.visible{
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        /*CGPA/SGPA*/
+        
+        .data-field {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px; /* Reduced margin for each field */
+        }
+        
+        .data-field input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #444;
+            color: #fff;
+        }
+        
+        .data-field input[type="number"]:focus {
+            border-color: #e60000;
+            background-color: #555;
+            outline: none;
+        }
+        
+        /*Button*/
+        
+        .calculate-button,.form-group button {
+            width: 100%;
+            max-width: 170px;
+            padding: 10px;
+            margin-top: 10px;
+            background: linear-gradient(45deg, #e60000, #9b0000); /* Mid red to dark red */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 400;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .calculate-button:active, .form-group button:active {
+            background: linear-gradient(45deg, #ff0000, #e60000); /* Mid red to dark red */
+            transform: translateY(-2px);
+        }
+
+
+        /*Footer*/
+        
+        .footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        padding: 10px;
+        text-align: left;
+        font-weight: 100;
+        font-size: small;
+        }
+        
+        .instagram-icon {
+        height: 20px; /* Adjust the height as needed */
+        width: auto;
+        vertical-align: middle;
+        margin-left: 5px; /* Add margin for spacing */
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Popup -->
+    <div class="popup">
+        <div class="popup-content">
+            <h2>Welcome to the <br>Student Calculator</h2>
+            <p>Hey there! It's Saf, Your ultimate tool for calculating Attendance and CGPA/SGPA.</p>
+            <p class="manual">Here is a Tiny Manual:<br></p>
+            <p> log in to your portal and fill in the details asked in the calculator. It's as easy as pie! If you have any questions along the way, don't hesitate to ask.</p>
+            <p>It's that Easy. Can we Launch? </p>
+        </div>
+        <button class="popup-button" onclick="closePopup()">Launch</button>
+    </div>
+
+     <!-- Slider -->
+     <div class="switch-container">
+        <label class="switch">
+            <input type="checkbox" id="toggleSwitch">
+            <span class="slider"></span>
+        </label>
+        <span id="switchLabel">Attendance Calculator</span>
+    </div>
+    
+    <!-- Attendance -->
+    <div id="attendanceForm" class="form-container" style="display: none;">
+        <form id="courseForm">
+            <div class="form-group">
+                <label for="lecture">Lecture (L)</label>
+                <input type="number" id="lecture" name="lecture">
+            </div>
+            <div class="form-group">
+                <label for="tutorial">Tutorial (T)</label>
+                <input type="number" id="tutorial" name="tutorial">
+            </div>
+            <div class="form-group">
+                <label for="practical">Practical (P)</label>
+                <input type="number" id="practical" name="practical">
+            </div>
+            <div class="form-group">
+                <label for="skill">Skill (S)</label>
+                <input type="number" id="skill" name="skill">
+            </div>
+            <div class="form-group">
+                <button type="button" onclick="calculateAttendance()">Calculate Attendance</button>
+            </div>
+            <div>
+                <p>Note: Leave the field blank if that component isn't present.</p>
+            </div>
+        </form>
+        <div id="resultAttend" class="resultAttend"></div>
+    </div>
+
+    <!-- CGPA/SGPA -->
+    <div id="cgpaForm" class="calculator-container" style="display: none;">
+        <div class="form-group">
+            <label for="numOfSubjects">Number of Subjects:</label>
+            <input type="number" id="numOfSubjects" name="numOfSubjects" min="1" max="20" step="1" required>
+        </div>
+        <div id="dataFieldsContainer"></div>
+        <button class="calculate-button" onclick="calculateCGPA()">Calculate SGPA/CGPA</button>
+        <div>
+            <p>Note: For CGPA, Use SGPA instead of Grade Points, Total Credits of Sem instead of Credits and No of Semesters instead of No of Subjects.</p>
+        </div>
+        <div id="resultCgpa" class="resultCgpa"></div>
+    </div>
+
+    <!--Footer-->
+    <div class="footer">
+        <p>&copy; 2024 Shaik Arshad | <a href="https://www.instagram.com/saf.arshad"><img src="C:\Users\Prince\Downloads\KLCAL\src\instagram_icon.webp" alt="Instagram" class="instagram-icon"></a></p>
+    </div>
+
+    <script>
+        /* Close Popup */
+        function closePopup() {
+            document.querySelector('.popup').style.display = 'none';
+            document.querySelector('.switch-container').style.display = 'flex';
+            document.getElementById('attendanceForm').style.display = 'block';
+        }
+
+        /* Slider */
+        document.getElementById('toggleSwitch').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('attendanceForm').style.display = 'none';
+                document.getElementById('cgpaForm').style.display = 'block';
+                document.getElementById('switchLabel').innerText = 'CGPA/SGPA Calculator';
+            } else {
+                document.getElementById('attendanceForm').style.display = 'block';
+                document.getElementById('cgpaForm').style.display = 'none';
+                document.getElementById('switchLabel').innerText = 'Attendance Calculator';
+            }
+        });
+
+        /* Attendance */
+        function calculateAttendance() {
+            const lecture = parseFloat(document.getElementById('lecture').value) || 0;
+            const tutorial = parseFloat(document.getElementById('tutorial').value) || 0;
+            const practical = parseFloat(document.getElementById('practical').value) || 0;
+            const skill = parseFloat(document.getElementById('skill').value) || 0;
+            let denominator = 0;
+
+            if (lecture !== 0) {
+                denominator += 100;
+            }
+            if (tutorial !== 0) {
+                denominator += 100;
+            }
+            if (practical !== 0) {
+                denominator += 50;
+            }
+            if (skill !== 0) {
+                denominator += 25;
+            }
+
+            const totalAttendance = ((lecture * 1 + tutorial * 1 + practical * 0.5 + skill * 0.25) / denominator) * 100;
+
+            if (!isNaN(totalAttendance)) {
+                const resultDiv = document.getElementById('resultAttend');
+                resultDiv.innerText = 'Avg Attendance: ' + totalAttendance +'%';
+                resultDiv.classList.add('visible');
+            } else {
+                resultDiv.innerText = 'Please FIll the Details';
+                resultDiv.classList.add('visible');
+            }
+           
+        }
+
+        /* CGPA/SGPA */
+        function generateDataFields() {
+            const numOfSubjects = parseInt(document.getElementById('numOfSubjects').value);
+            const dataFieldsContainer = document.getElementById('dataFieldsContainer');
+            dataFieldsContainer.innerHTML = '';
+
+            for (let i = 0; i < numOfSubjects; i++) {
+                const dataField = document.createElement('div');
+                dataField.classList.add('data-field');
+
+                const gpaInput = document.createElement('input');
+                gpaInput.type = 'number';
+                gpaInput.placeholder = 'Grade Points';
+                gpaInput.name = `gpa${i+1}`;
+
+                const creditsInput = document.createElement('input');
+                creditsInput.type = 'number';
+                creditsInput.placeholder = 'Credits';
+                creditsInput.name = `credits${i+1}`;
+
+                dataField.appendChild(gpaInput);
+                dataField.appendChild(creditsInput);
+                dataFieldsContainer.appendChild(dataField);
+            }
+        }
+
+        function calculateCGPA() {
+            const numOfSubjects = parseInt(document.getElementById('numOfSubjects').value);
+            let totalCredits = 0;
+            let totalGradePoints = 0;
+
+            for (let i = 0; i < numOfSubjects; i++) {
+                const gpa = parseFloat(document.getElementsByName(`gpa${i+1}`)[0].value);
+                const credits = parseInt(document.getElementsByName(`credits${i+1}`)[0].value);
+
+                if (!isNaN(gpa) && !isNaN(credits)) {
+                    totalGradePoints += gpa * credits;
+                    totalCredits += credits;
+                }
+            }
+
+            const cgpa = totalGradePoints / totalCredits;
+
+            if (!isNaN(cgpa)) {
+                const resultDiv = document.getElementById('resultCgpa');
+                resultDiv.innerText = 'Your CGPA is: ' + cgpa.toFixed(2);
+                resultDiv.classList.add('visible');
+            }
+            else {
+                resultDiv.innerText = 'Please FIll the Details';
+                resultDiv.classList.add('visible');
+            }
+        }
+
+        document.getElementById('numOfSubjects').addEventListener('change', generateDataFields);
+        generateDataFields();
+    </script>
+</body>
+</html>
